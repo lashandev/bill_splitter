@@ -461,7 +461,7 @@ private void loadSession() {
             ResultSet rs = DBConf.search(sql);
             Vector row = new Vector();
             while (rs.next()) {
-                row.add(rs.getString("id") + "-" + rs.getString("name") + "-" + rs.getString("place"));
+                row.add(rs.getString("id") + "-" + rs.getString("name") + "-" + rs.getString("place") + "-" + rs.getString("date"));
             }
             combo_sessiondata.setModel(new DefaultComboBoxModel<>(row));
         } catch (Exception e) {

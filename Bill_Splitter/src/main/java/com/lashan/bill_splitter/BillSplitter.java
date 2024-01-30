@@ -7,7 +7,10 @@ package com.lashan.bill_splitter;
 
 import com.lashan.bill_splitter.db.DBConf;
 import java.sql.ResultSet;
+import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 import javax.swing.DefaultComboBoxModel;
@@ -17,6 +20,7 @@ import net.sf.jasperreports.engine.JasperCompileManager;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperReport;
+import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 import net.sf.jasperreports.engine.data.JRTableModelDataSource;
 import net.sf.jasperreports.view.JasperViewer;
 
@@ -25,6 +29,10 @@ import net.sf.jasperreports.view.JasperViewer;
  * @author Lashan
  */
 public class BillSplitter extends javax.swing.JFrame {
+
+    private DecimalFormat df = new DecimalFormat("#.##");
+
+    private double tot_item = 0, tot_each = 0;
 
     /**
      * Creates new form BillSplitter
@@ -196,22 +204,25 @@ public class BillSplitter extends javax.swing.JFrame {
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         String session = combo_sessiondata.getSelectedItem().toString().split("-")[0];
-
+        tot_each = 0;
+        tot_item = 0;
         try {
             String sql = "select i.id,s.name,m.name,s.total/(select count(*) from event_item x where x.item=i.item) from event_item i"
                     + " inner join eventdata e on i.eventdata = e.id INNER JOIN member m on e.member = m.id INNER JOIN"
                     + " item s on i.item = s.id where e.sessiondata='" + session + "' order by m.name asc";
             DefaultTableModel dtm = (DefaultTableModel) jTable1.getModel();
             dtm.setRowCount(0);
-            ResultSet rs2 = DBConf.search(sql);
+            ResultSet rs1 = DBConf.search(sql);
             int index = 0;
-            while (rs2.next()) {
+            while (rs1.next()) {
                 Vector row = new Vector();
                 row.add(++index);
-                row.add(rs2.getString(3));
-                row.add(rs2.getString(2));
-                row.add(rs2.getString(4));
+                row.add(rs1.getString(3));
+                row.add(rs1.getString(2));
+                String val = df.format(rs1.getDouble(4));
+                row.add(val);
                 dtm.addRow(row);
+                tot_item += Double.parseDouble(val);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -219,7 +230,7 @@ public class BillSplitter extends javax.swing.JFrame {
         try {
             String sql2 = "select m.name,SUM(s.total/(select count(*) from event_item x where x.item=i.item)) from event_item i"
                     + " inner join eventdata e on i.eventdata = e.id INNER JOIN member m on e.member = m.id INNER JOIN"
-                    + " item s on i.item = s.id where e.sessiondata='"+session+"' GROUP BY m.id ORDER BY m.name ASC";
+                    + " item s on i.item = s.id where e.sessiondata='" + session + "' GROUP BY m.id ORDER BY m.name ASC";
             DefaultTableModel dtm2 = (DefaultTableModel) jTable2.getModel();
             dtm2.setRowCount(0);
             ResultSet rs2 = DBConf.search(sql2);
@@ -228,8 +239,9 @@ public class BillSplitter extends javax.swing.JFrame {
                 Vector row = new Vector();
                 row.add(++index);
                 row.add(rs2.getString(1));
-                row.add(rs2.getString(2));
+                row.add(df.format(rs2.getDouble(2)));
                 dtm2.addRow(row);
+                tot_each += Double.parseDouble(df.format(rs2.getDouble(2)));
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -244,22 +256,59 @@ public class BillSplitter extends javax.swing.JFrame {
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
         try {
+            List<DataDto> list = new ArrayList<>();
+
+            String sesid = combo_sessiondata.getSelectedItem().toString().split("-")[0];
+            String sql = "select m.name,SUM(s.total/(select count(*) from event_item x where x.item=i.item)) as total,"
+                    + "(select sum(c.amount) from contribution c INNER JOIN eventdata e1 on c.eventdata = e1.id where e1.sessiondata=e.sessiondata and e1.id=e.id) as paid,"
+                    + " ((SUM(s.total/(select count(*) from event_item x where x.item=i.item)))-(select sum(c.amount) from contribution c INNER JOIN eventdata e1 on c.eventdata = e1.id where e1.sessiondata=e.sessiondata and e1.id=e.id)) as balance"
+                    + " from event_item i inner join eventdata e on i.eventdata = e.id INNER JOIN member m on e.member = m.id "
+                    + "INNER JOIN item s on i.item = s.id  where e.sessiondata='" + sesid + "' GROUP BY m.id ORDER BY m.name ASC";
+            ResultSet rs = DBConf.search(sql);
+            while (rs.next()) {
+                DataDto dataDto = new DataDto();
+                dataDto.setName(rs.getString(1));
+                dataDto.setTotal(df.format(rs.getDouble(2)));
+                if (rs.getString(3) != null) {
+                    dataDto.setPaid(df.format(rs.getDouble(3)));
+                } else {
+                    dataDto.setPaid("0.0");
+                }
+
+                if (rs.getString(4) != null) {
+                    if (rs.getDouble(4) > 0) {
+                        dataDto.setBalance("You need to Pay LKR " + df.format(rs.getDouble(4)));
+                    } else {
+                        dataDto.setBalance("You need Received LKR " + df.format(rs.getDouble(4) * -1));
+                    }
+                } else {
+                    dataDto.setBalance("You need to Pay LKR " + df.format(rs.getDouble(2)));
+                }
+                
+                list.add(dataDto);
+
+            }
+
             String session = combo_sessiondata.getSelectedItem().toString();
-            String path = "H:\\Project_Dir\\Lash_APP_Test\\billsplitter.jrxml";
+            String path = "E:\\other_project\\bill_splitter\\billsplitter.jrxml";
             JasperReport jasperReport = JasperCompileManager.compileReport(path);
-            Map<String,Object> parameters = new HashMap<>();
+            Map<String, Object> parameters = new HashMap<>();
             parameters.put("sessiondata", session);
-            
+
             JRTableModelDataSource dataSource1 = new JRTableModelDataSource(jTable1.getModel());
             JRTableModelDataSource dataSource2 = new JRTableModelDataSource(jTable2.getModel());
+            JRBeanCollectionDataSource dataSource3 = new JRBeanCollectionDataSource(list);
             parameters.put("data1", dataSource1);
             parameters.put("data2", dataSource2);
+            parameters.put("data3", dataSource3);
             parameters.put("account", jTextArea1.getText());
-            
-            
+            parameters.put("tot_item", tot_item);
+            parameters.put("tot_each_person", tot_each);
+
             JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, parameters, new JREmptyDataSource());
             JasperViewer.viewReport(jasperPrint, false);
         } catch (Exception e) {
+            e.printStackTrace();
         }
     }//GEN-LAST:event_jButton2ActionPerformed
 
@@ -321,7 +370,7 @@ private void loadSession() {
             ResultSet rs = DBConf.search(sql);
             Vector row = new Vector();
             while (rs.next()) {
-                row.add(rs.getString("id") + "-" + rs.getString("name") + "-" + rs.getString("place") + "-"+rs.getString("date"));
+                row.add(rs.getString("id") + "-" + rs.getString("name") + "-" + rs.getString("place") + "-" + rs.getString("date"));
             }
             combo_sessiondata.setModel(new DefaultComboBoxModel<>(row));
         } catch (Exception e) {

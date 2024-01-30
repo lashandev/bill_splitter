@@ -18,7 +18,7 @@ public class DBConf {
     private static Connection connection;
 
     private static void createConnection() throws Exception {
-        String url = "jdbc:sqlite:H:\\Project_Dir\\Lash_APP_Test\\app_db\\fun_split";
+        String url = "jdbc:sqlite:E:\\other_project\\bill_splitter\\app_db\\fun_split";
         connection = DriverManager.getConnection(url);
         System.out.println("Connection to SQLite has been established.");
     }
