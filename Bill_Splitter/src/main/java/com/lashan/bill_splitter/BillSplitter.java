@@ -279,7 +279,7 @@ public class BillSplitter extends javax.swing.JFrame {
                     if (rs.getDouble(4) > 0) {
                         dataDto.setBalance("You need to Pay LKR " + df.format(rs.getDouble(4)));
                     } else {
-                        dataDto.setBalance("You need Received LKR " + df.format(rs.getDouble(4) * -1));
+                        dataDto.setBalance("You have to get LKR " + df.format(rs.getDouble(4) * -1));
                     }
                 } else {
                     dataDto.setBalance("You need to Pay LKR " + df.format(rs.getDouble(2)));
