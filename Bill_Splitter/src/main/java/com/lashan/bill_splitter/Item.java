@@ -74,13 +74,36 @@ public class Item extends javax.swing.JFrame {
 
         jLabel2.setText("Name");
 
+        txt_name.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txt_nameActionPerformed(evt);
+            }
+        });
+
         jLabel3.setText("Amount");
+
+        txt_ammount.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txt_ammountActionPerformed(evt);
+            }
+        });
 
         jLabel4.setText("Tax");
 
         txt_tax.setText("0");
+        txt_tax.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txt_taxActionPerformed(evt);
+            }
+        });
 
         jLabel5.setText("Total");
+
+        txt_total.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txt_totalActionPerformed(evt);
+            }
+        });
 
         jButton1.setText("Save");
         jButton1.addActionListener(new java.awt.event.ActionListener() {
@@ -392,6 +415,37 @@ public class Item extends javax.swing.JFrame {
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_jButton2ActionPerformed
+
+    private void txt_ammountActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txt_ammountActionPerformed
+        txt_tax.setText("0");
+        txt_total.setText(txt_ammount.getText());
+        txt_tax.grabFocus();
+    }//GEN-LAST:event_txt_ammountActionPerformed
+
+    private void txt_taxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txt_taxActionPerformed
+        txt_total.grabFocus();
+    }//GEN-LAST:event_txt_taxActionPerformed
+
+    private void txt_totalActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txt_totalActionPerformed
+        try {
+            String session = combo_sessiondata.getSelectedItem().toString().split("-")[0];
+            String sql = "insert into item ('sessiondata','name','amount','tax','total')values('"
+                    + session + "','" + txt_name.getText() + "','" + txt_ammount.getText()
+                    + "','" + txt_tax.getText() + "','" + txt_total.getText() + "')";
+            DBConf.iud(sql);
+            refreshFrame();
+            refreshSourceTable();
+            refreshItemTable();
+            refreshTargetTable();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        txt_name.grabFocus();
+    }//GEN-LAST:event_txt_totalActionPerformed
+
+    private void txt_nameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txt_nameActionPerformed
+        txt_ammount.grabFocus();        // TODO add your handling code here:
+    }//GEN-LAST:event_txt_nameActionPerformed
 
     /**
      * @param args the command line arguments

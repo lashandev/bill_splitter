@@ -20,9 +20,11 @@ import javax.swing.text.JTextComponent;
  * @author lashan_chandika
  */
 public class Settle extends javax.swing.JFrame {
-private double total = 0;
-private double amount = 0;
-private DecimalFormat df = new DecimalFormat("#.##");
+
+    private double total = 0;
+    private double amount = 0;
+    private DecimalFormat df = new DecimalFormat("#.##");
+
     /**
      * Creates new form Settle
      */
@@ -50,6 +52,7 @@ private DecimalFormat df = new DecimalFormat("#.##");
         paymentTable = new javax.swing.JTable();
         txt_total = new javax.swing.JLabel();
         txt_payment = new javax.swing.JLabel();
+        jButton2 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -108,6 +111,13 @@ private DecimalFormat df = new DecimalFormat("#.##");
         txt_payment.setForeground(new java.awt.Color(255, 0, 0));
         txt_payment.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
+        jButton2.setText("Home");
+        jButton2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton2ActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -125,10 +135,12 @@ private DecimalFormat df = new DecimalFormat("#.##");
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 235, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(txt_total, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jScrollPane2)
-                            .addComponent(txt_payment, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                .addComponent(txt_total, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(jScrollPane2)
+                                .addComponent(txt_payment, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                            .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 229, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addGap(64, 64, 64))))
         );
         layout.setVerticalGroup(
@@ -148,7 +160,9 @@ private DecimalFormat df = new DecimalFormat("#.##");
                         .addComponent(txt_total, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(txt_payment, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(113, Short.MAX_VALUE))
+                .addGap(43, 43, 43)
+                .addComponent(jButton2)
+                .addContainerGap(45, Short.MAX_VALUE))
         );
 
         pack();
@@ -162,15 +176,21 @@ private DecimalFormat df = new DecimalFormat("#.##");
         refreshPaidList();
         setTotal();
         getSplitAmount();
-        double ans  = total - amount;
-        if (ans >0) {
-            txt_payment.setText("You need to Received LKR "+df.format(ans));
+        double ans = total - amount;
+        if (ans > 0) {
+            txt_payment.setText("You need to Received LKR " + df.format(ans));
             txt_payment.setForeground(Color.red);
-        }else{
-            txt_payment.setText("You need Pay LKR "+df.format(ans*-1));
+        } else {
+            txt_payment.setText("You need Pay LKR " + df.format(ans * -1));
             txt_payment.setForeground(Color.BLUE);
         }
     }//GEN-LAST:event_sourceTableMouseClicked
+
+    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+        HomePage homePage = new HomePage();
+        homePage.setVisible(true);
+        dispose();// TODO add your handling code here:
+    }//GEN-LAST:event_jButton2ActionPerformed
 
     /**
      * @param args the command line arguments
@@ -210,6 +230,7 @@ private DecimalFormat df = new DecimalFormat("#.##");
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JComboBox<String> combo_sessiondata;
     private javax.swing.JButton jButton1;
+    private javax.swing.JButton jButton2;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
@@ -218,7 +239,7 @@ private DecimalFormat df = new DecimalFormat("#.##");
     private javax.swing.JLabel txt_payment;
     private javax.swing.JLabel txt_total;
     // End of variables declaration//GEN-END:variables
-    
+
     private void loadSession() {
 
         String sql = "select * from sessiondata where active='1' order by id desc";
@@ -242,8 +263,8 @@ private DecimalFormat df = new DecimalFormat("#.##");
             }
         }
     }
-    
-     private void refreshSourceTable() {
+
+    private void refreshSourceTable() {
         String session = combo_sessiondata.getSelectedItem().toString().split("-")[0];
         DefaultTableModel dtm = (DefaultTableModel) sourceTable.getModel();
         dtm.setRowCount(0);
@@ -261,7 +282,7 @@ private DecimalFormat df = new DecimalFormat("#.##");
             e.printStackTrace();
         }
     }
-     
+
     private void refreshPaidList() {
         String session = combo_sessiondata.getSelectedItem().toString().split("-")[0];
         String eid = sourceTable.getValueAt(sourceTable.getSelectedRow(), 0).toString();
@@ -271,7 +292,7 @@ private DecimalFormat df = new DecimalFormat("#.##");
         try {
             String sql1 = "select c.remark,c.amount from contribution c "
                     + "INNER JOIN eventdata e on c.eventdata = e.id "
-                    + "INNER JOIN member m on e.member = m.id where e.sessiondata='"+session+"' and e.id='"+eid+"'";
+                    + "INNER JOIN member m on e.member = m.id where e.sessiondata='" + session + "' and e.id='" + eid + "'";
             ResultSet rs = DBConf.search(sql1);
             while (rs.next()) {
                 Vector row = new Vector();
@@ -288,16 +309,16 @@ private DecimalFormat df = new DecimalFormat("#.##");
     private void setTotal() {
         String session = combo_sessiondata.getSelectedItem().toString().split("-")[0];
         String eid = sourceTable.getValueAt(sourceTable.getSelectedRow(), 0).toString();
-        
+
         try {
             String sql1 = "select sum(c.amount) from contribution c "
                     + "INNER JOIN eventdata e on c.eventdata = e.id "
                     + "INNER JOIN member m on e.member = m.id "
-                    + "where e.sessiondata='"+session+"' and e.id='"+eid+"';";
+                    + "where e.sessiondata='" + session + "' and e.id='" + eid + "';";
             ResultSet rs = DBConf.search(sql1);
             if (rs.next()) {
-               txt_total.setText("Total Payment Received :"+((rs.getString(1)!=null)?rs.getString(1):"0.00"));
-               total = (rs.getString(1)!=null)?Double.parseDouble(rs.getString(1)):0.0;
+                txt_total.setText("Total Payment Received :" + ((rs.getString(1) != null) ? rs.getString(1) : "0.00"));
+                total = (rs.getString(1) != null) ? Double.parseDouble(rs.getString(1)) : 0.0;
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -310,8 +331,8 @@ private DecimalFormat df = new DecimalFormat("#.##");
             String eid = sourceTable.getValueAt(sourceTable.getSelectedRow(), 0).toString();
             String sql2 = "select SUM(s.total/(select count(*) from event_item x where x.item=i.item)) from event_item i "
                     + "INNER JOIN eventdata e on i.eventdata = e.id "
-                    + "INNER JOIN item s on i.item = s.id where e.sessiondata='"+session+"' and e.id='"+eid+"'";
-            
+                    + "INNER JOIN item s on i.item = s.id where e.sessiondata='" + session + "' and e.id='" + eid + "'";
+
             ResultSet rs2 = DBConf.search(sql2);
             if (rs2.next()) {
                 amount = rs2.getDouble(1);
