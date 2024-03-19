@@ -423,6 +423,10 @@ public class Item extends javax.swing.JFrame {
     }//GEN-LAST:event_txt_ammountActionPerformed
 
     private void txt_taxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txt_taxActionPerformed
+        double ammount = Double.parseDouble(txt_ammount.getText());
+        double tax = Double.parseDouble(txt_tax.getText());
+        double tot = ammount + (ammount*tax/100);
+        txt_total.setText(""+tot);
         txt_total.grabFocus();
     }//GEN-LAST:event_txt_taxActionPerformed
 
